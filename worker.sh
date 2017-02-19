@@ -46,13 +46,8 @@ else
 fi	
 
 DATE=`date +%Y-%m-%d_%H:%M:%S`
-MY_PID_FILE="${WORKING_DIR}/worker.pid"
-echo  "pid=$$"  > $MY_PID_FILE
-echo  "date=$DATE"  >> $MY_PID_FILE
-echo  "get=$GET_PATH"  >> $MY_PID_FILE
-echo  "filename=$FILENAME"  >> $MY_PID_FILE
-echo  "put=$PUT_PATH"  >> $MY_PID_FILE
-echo  "trans=$TRANSCODE_FORMATS_LIST"  >> $MY_PID_FILE
+MY_PID_FILE="${WORKING_DIR}/$$.worker.pid"
+echo  "$$"  > $MY_PID_FILE
 
 
 CMD="timeout $TIMEOUT_GET_FILE $RSYNC $GET_PATH/$FILENAME $WORKING_DIR"
@@ -93,11 +88,11 @@ for i in $TRANSCODE_FORMATS_LIST; do
 			exit 1			
 		fi			
 	fi
-	CMD="$DIRNAME/send2queue.pl 2 '$DIRNAME/transcoder.sh $ID $DOWNLOAD_DIR/$SOURCE_FILENAME $PUT_PATH $i'"
+	CMD="$DIRNAME/send2queue.pl transcoder '$DIRNAME/transcoder.sh $ID $DOWNLOAD_DIR/$SOURCE_FILENAME $PUT_PATH $i'"
 	if [ "x$DEBUG" == "x1" ]; then
 		echo $CMD 
 	else
-		w2log "Put job in queue: transcode '$DOWNLOAD_DIR/$SOURCE_FILENAME' to $i'"
+		w2log "Put job in queue: transcoder '$DOWNLOAD_DIR/$SOURCE_FILENAME' to $i'"
 		$CMD >> $PROCESS_LOG 2>&1
 	fi
 	if [  $? -ne 0  ]; then

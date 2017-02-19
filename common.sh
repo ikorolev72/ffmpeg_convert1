@@ -17,6 +17,10 @@ export TIMEOUT_GET_FILE=3600 # 1hour
 export TIMEOUT_TRANSCODE=3600 # 1hour
 export TIMEOUT_PUT_FILE=3600 # 1hour
 export TIMEOUT_GET_LS=60 # 1min
+export JOBS_LIMIT_DOWNLOAD=3
+export JOBS_LIMIT_TRANSCODER=3
+export JOBS_LIMIT_UPLOAD=3
+
 export RSYNC=/usr/bin/rsync
 export LOG=$DATA_DIR/ffmpeg_convert1.log
 

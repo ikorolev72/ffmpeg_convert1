@@ -37,12 +37,9 @@ else
 fi	
 
 DATE=`date +%Y-%m-%d_%H:%M:%S`
-MY_PID_FILE="${WORKING_DIR}/transcode.pid"
-echo  "pid=$$"  > $MY_PID_FILE
-echo  "date=$DATE"  >> $MY_PID_FILE
-echo  "filename=$FILENAME"  >> $MY_PID_FILE
-echo  "put=$PUT_PATH"  >> $MY_PID_FILE
-echo  "trans=$TRANSCODE_FORMAT"  >> $MY_PID_FILE
+MY_PID_FILE="${WORKING_DIR}/$$.transcoder.pid"
+echo  "$$"  > $MY_PID_FILE
+
 
 
 if [ "x$DEBUG" != "x1" ]; then
