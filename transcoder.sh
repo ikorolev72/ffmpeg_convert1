@@ -25,7 +25,7 @@ PROCESS_LOG=$WORKING_DIR/$$.log
 w2log "$@"
 
 # check the arguments
-if [[ "x$ID" == "x" || "x$FILENAME" == "x" || "x$PUT_PATH" == "x" "x$TRANSCODE_FORMAT" == "x" ]] ; then
+if [[ "x$ID" == "x" || "x$FILENAME" == "x" || "x$PUT_PATH" == "x" || "x$TRANSCODE_FORMAT" == "x" ]] ; then
 	echo "Usage:$0 id  file.mp4 rsync://user@domain.com:/path_for_transcoded_files/ transcode_to_format"
 	exit 1
 fi	
@@ -84,25 +84,22 @@ else
 	fi
 fi	
 
-###################### put file to remote server
-CMD="timeout $TIMEOUT_PUT_FILE $RSYNC $OUTPUT_FILENAME $PUT_PATH"
+###################### put job in the queue for upload to remote server
+
+CMD="$DIRNAME/send2queue.pl uploader '$DIRNAME/uploader.sh $ID $OUTPUT_FILENAME $PUT_PATH'"
 if [ "x$DEBUG" == "x1" ]; then
-	echo $CMD
-	echo "rm -rf $WORKING_DIR"
+	echo $CMD 
 else
-	w2log "Start upload '$OUTPUT_FILENAME' to '$PUT_PATH'"
+	w2log "Put job in queue: uploader '$OUTPUT_FILENAME' to '$PUT_PATH'"
 	$CMD >> $PROCESS_LOG 2>&1
 fi
-
 if [  $? -ne 0  ]; then
-	w2log "Error: Cannot upload '$OUTPUT_FILENAME' to '$PUT_PATH'. See $PROCESS_LOG"
-	rm -rf $WORKING_DIR
+	w2log "Error: Cannot put job in the queue. See $PROCESS_LOG"
 	rm -rf $MY_PID_FILE
 	exit 1
 fi	
 
 
 w2log "Job $$ finished successfully"
-rm -rf $WORKING_DIR
 rm -rf $MY_PID_FILE
 exit 0

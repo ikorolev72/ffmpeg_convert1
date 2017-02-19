@@ -1,11 +1,11 @@
 #/bin/bash
 # korolev-ia [] yandex.ru
-# This worker download the file with rsync
+# This downloader download the file with rsync
 # transcode into another format
 # upload to new resource
 # 
 # Arguments: rsync://get_path/ filename.mp4 rsync://put_path/ [ transcode_to_format ]
-# eg worker.sh rsync://user@domain.com:/get_path/ filename.mp4 rsync://user@domain.com:/put_path/
+# eg downloader.sh rsync://user@domain.com:/get_path/ filename.mp4 rsync://user@domain.com:/put_path/
 BASENAME=`basename $0`
 cd `dirname $0`
 DIRNAME=`pwd`
@@ -46,7 +46,7 @@ else
 fi	
 
 DATE=`date +%Y-%m-%d_%H:%M:%S`
-MY_PID_FILE="${WORKING_DIR}/$$.worker.pid"
+MY_PID_FILE="${WORKING_DIR}/$$.downloader.pid"
 echo  "$$"  > $MY_PID_FILE
 
 

@@ -1,6 +1,6 @@
 #/bin/bash
 # korolev-ia [] yandex.ru
-# This watchdog
+# This job_starter
 # check the new files, check the queue and run tasks
 # 
 
@@ -12,8 +12,8 @@ source "$DIRNAME/common.sh"
 #DEBUG=1
 
 
-WORKING_DIR=$DATA_DIR/watchdog
-PROCESS_LOG=$WORKING_DIR/watchdog.log
+WORKING_DIR=$DATA_DIR/job_starter
+PROCESS_LOG=$WORKING_DIR/job_starter.log
 VIDEO_EXT="'.mp4$|.avi$|.mkv$'"
 
 if [ "x$DEBUG" == "x1" ]; then
@@ -23,13 +23,14 @@ else
 fi	
 
 DATE=`date +%Y-%m-%d_%H:%M:%S`
-MY_PID_FILE="${WORKING_DIR}/watchdog.pid"
-#ps --pid `cat $MY_PID_FILE` -o cmd h | grep `basename $0` >/dev/null 2>&1 
-ps --pid `cat $MY_PID_FILE` -o cmd h  >/dev/null 2>&1 
-if [ $? -ne 0 ]; then
-	# previrouse watchdog don't finished yet
-	exit 0
-fi				
+MY_PID_FILE="${WORKING_DIR}/job_starter.pid" 
+if [ -f  $MY_PID_FILE ]; then 
+	ps --pid `cat $MY_PID_FILE` -o cmd h  >/dev/null 2>&1 
+	if [ $? -eq 0 ]; then
+		# previrouse job_starter don't finished yet
+		exit 0
+	fi				
+fi
 echo  $$  > $MY_PID_FILE
 
 
@@ -41,8 +42,7 @@ else
 fi
 
 # now we check if file don't changes during a minute 
-if [ -f $WORKING_DIR/ls.tmp.old ]
-else
+if [ ! -f $WORKING_DIR/ls.tmp.old ]; then
 	# first start
 	mv $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old
 	exit 0
@@ -62,11 +62,11 @@ do
 	fi		
 	mkdir $DATA_DIR/$ID
 	FILENAME=`echo $next | awk '{ print $5 }'`
-	CMD="$DIRNAME/send2queue.pl download '$DIRNAME/worker.sh $ID $REMOTE_SOURCE $FILENAME REMOTE_TARGET'"
+	CMD="$DIRNAME/send2queue.pl downloader '$DIRNAME/downloader.sh $ID $REMOTE_SOURCE $FILENAME REMOTE_TARGET'"
 	if [ "x$DEBUG" == "x1" ]; then
 		echo $CMD 
 	else
-		w2log "Put job in queue: download file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
+		w2log "Put job in queue: downloader file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
 		$CMD >> $PROCESS_LOG 2>&1
 	fi		
 done 
@@ -75,8 +75,8 @@ mv $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old
 
 
 ########## check failed jobs
-# check worker jobs
-for pid_file in  `find $DATA_DIR -name "*.worker.pid" -o -name "*.transcoder.pid"`; do
+# check downloader jobs
+for pid_file in  `find $DATA_DIR -name '*.downloader.pid' -o -name '*.transcoder.pid'  -o -name '*.uploader.pid'`; do
 	ps --pid `cat $pid_file` -o cmd h >/dev/null 2>&1 
 	if [ $? -ne 0 ]; then
 		# failed job ( process crashed or killed )
@@ -86,10 +86,10 @@ done
 # end of check
 
 ########## run jobs in the queues
-# queue download
-RUNNING_JOBS=`find $DATA_DIR -name "*.worker.pid" | wc -l`
-for i in `seq $JOBS $JOBS_LIMIT_DOWNLOAD` ; do
-	JOB=`$DIRNAME/send2queue.pl download`
+# queue downloader
+RUNNING_JOBS=`find $DATA_DIR -name "*.downloader.pid" | wc -l`
+for i in `seq $RUNNING_JOBS $JOBS_LIMIT_DOWNLOADER` ; do
+	JOB=`$DIRNAME/send2queue.pl downloader`
 	if [ $? -ne 0 ]; then
 		# queue is empty
 		break
@@ -99,8 +99,18 @@ done
 
 # queue transcoder
 RUNNING_JOBS=`find $DATA_DIR -name "*.transcoder.pid" | wc -l`
-for i in `seq $JOBS $JOBS_LIMIT_TRANSCODER` ; do
+for i in `seq $RUNNING_JOBS $JOBS_LIMIT_TRANSCODER` ; do
 	JOB=`$DIRNAME/send2queue.pl transcoder`
+	if [ $? -ne 0 ]; then
+		# queue is empty
+		break
+	fi
+	$JOB >> $PROCESS_LOG 2>&1 &
+done
+# queue uploader
+RUNNING_JOBS=`find $DATA_DIR -name "*.uploader.pid" | wc -l`
+for i in `seq $RUNNING_JOBS $JOBS_LIMIT_UPLOADER` ; do
+	JOB=`$DIRNAME/send2queue.pl uploader`
 	if [ $? -ne 0 ]; then
 		# queue is empty
 		break
