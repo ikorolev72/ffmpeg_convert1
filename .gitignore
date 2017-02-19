@@ -1,0 +1,15 @@
+*.zip
+*.rar
+*.tar
+*.tgz
+*.mp4
+*.avi
+*.mp3
+*.tar.gz
+*.db
+*.log
+tmp/*
+html/media/*
+data/log/*
+data/var/*
+ovpn/*
