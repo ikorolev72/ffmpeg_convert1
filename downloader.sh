@@ -102,6 +102,6 @@ for i in $TRANSCODE_FORMATS_LIST; do
 	fi	
 done
 
-w2log "Job $$ finished successfully"
+w2log "Process $$ finished successfully"
 rm -rf $MY_PID_FILE
 exit 0

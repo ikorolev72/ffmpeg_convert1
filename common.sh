@@ -1,7 +1,7 @@
 # common settings
 # variables and function
 
-DEBUG=1
+#DEBUG=1
 export PROJECT_DIR=/home/osboxes/ffmpeg_convert1
 export FFMPEG_DIR=/usr/bin
 export REMOTE_SOURCE='/tmp/2/'

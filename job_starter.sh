@@ -14,7 +14,7 @@ source "$DIRNAME/common.sh"
 
 WORKING_DIR=$DATA_DIR/job_starter
 PROCESS_LOG=$WORKING_DIR/job_starter.log
-VIDEO_EXT="'.mp4$|.avi$|.mkv$'"
+VIDEO_EXT="'.mp4\\$|.avi\\$|.mkv\\$'"
 
 if [ "x$DEBUG" == "x1" ]; then
 	echo "mkdir -p '$WORKING_DIR'"
@@ -44,34 +44,63 @@ fi
 # now we check if file don't changes during a minute 
 if [ ! -f $WORKING_DIR/ls.tmp.old ]; then
 	# first start
-	mv $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old
-	exit 0
+	CMD="mv $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old"
+	if [ "x$DEBUG" == "x1" ]; then
+		echo $CMD
+	else
+		$CMD
+		exit 0
+	fi
 fi
 
+
+
 IFS=$'\n'
-for next in `cat $WORKING_DIR/ls.tmp`
+for next in `$DIRNAME/same_strings.pl --f1=$WORKING_DIR/ls.tmp --f2=$WORKING_DIR/ls.tmp.old`
 do
 	ID=`echo $next | /usr/bin/md5sum | awk '{ print $1 }'`
-	if [ -d $DATA_DIR/$ID ]
+	if [ -d $DATA_DIR/$ID ]; then
 		continue
 	fi
-	# check if this file exist more than 1 minute
-	grep "$next" $WORKING_DIR/ls.tmp.old >/dev/null 2>&1
-	if [  $? -ne 0  ]; then
-		continue
-	fi		
-	mkdir $DATA_DIR/$ID
 	FILENAME=`echo $next | awk '{ print $5 }'`
 	CMD="$DIRNAME/send2queue.pl downloader '$DIRNAME/downloader.sh $ID $REMOTE_SOURCE $FILENAME REMOTE_TARGET'"
 	if [ "x$DEBUG" == "x1" ]; then
+		echo "mkdir $DATA_DIR/$ID"
 		echo $CMD 
 	else
 		w2log "Put job in queue: downloader file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
+		mkdir $DATA_DIR/$ID
 		$CMD >> $PROCESS_LOG 2>&1
-	fi		
-done 
-
-mv $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old
+	fi			
+done
+#for next in `cat $WORKING_DIR/ls.tmp`
+#do
+#	ID=`echo $next | /usr/bin/md5sum | awk '{ print $1 }'`
+#	if [ -d $DATA_DIR/$ID ]; then
+#		continue
+#	fi
+#	# check if this file exist more than 1 minute
+#	grep "$next" $WORKING_DIR/ls.tmp.old >/dev/null 2>&1
+#	if [  $? -ne 0  ]; then
+#		continue
+#	fi		
+#	mkdir $DATA_DIR/$ID
+#	FILENAME=`echo $next | awk '{ print $5 }'`
+#	CMD="$DIRNAME/send2queue.pl downloader '$DIRNAME/downloader.sh $ID $REMOTE_SOURCE $FILENAME REMOTE_TARGET'"
+#	if [ "x$DEBUG" == "x1" ]; then
+#		echo $CMD 
+#	else
+#		w2log "Put job in queue: downloader file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
+#		$CMD >> $PROCESS_LOG 2>&1
+#	fi		
+#done 
+CMD="mv $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old"
+if [ "x$DEBUG" == "x1" ]; then
+	echo $CMD 
+else
+	w2log "Put job in queue: downloader file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
+	$CMD >> $PROCESS_LOG 2>&1
+fi
 
 
 ########## check failed jobs
@@ -121,6 +150,6 @@ done
 
 
 ########## run jobs
-w2log "Job $$ finished successfully"
+w2log "Process $$ finished successfully"
 rm -rf $MY_PID_FILE
 exit 0

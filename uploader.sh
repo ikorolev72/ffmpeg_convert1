@@ -66,6 +66,6 @@ if [  $? -ne 0  ]; then
 fi	
 
 
-w2log "Job $$ finished successfully"
+w2log "Process $$ finished successfully"
 rm -rf $MY_PID_FILE
 exit 0
