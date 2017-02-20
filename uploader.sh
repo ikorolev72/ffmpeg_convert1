@@ -24,7 +24,7 @@ PROCESS_LOG=$WORKING_DIR/$$.log
 w2log "$@"
 
 # check the arguments
-if [[ "x$ID" == "x" || "x$FILENAME" == "x" || "x$PUT_PATH" == "x"  ]] ; then
+if [[ "x$ID" == "x" || "x$OUTPUT_FILENAME" == "x" || "x$PUT_PATH" == "x"  ]] ; then
 	echo "Usage:$0 id  file.mp4 rsync://user@domain.com:/path_for_transcoded_files/"
 	exit 1
 fi	
@@ -42,8 +42,8 @@ echo  "$$"  > $MY_PID_FILE
 
 
 if [ "x$DEBUG" != "x1" ]; then
-	if [ ! -f "$FILENAME"  ]; then
-		w2log "File $FILENAME do not exist"
+	if [ ! -f "$OUTPUT_FILENAME"  ]; then
+		w2log "File $OUTPUT_FILENAME do not exist"
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
@@ -66,6 +66,6 @@ if [  $? -ne 0  ]; then
 fi	
 
 
-w2log "Process $$ finished successfully"
+#w2log "Process $$ finished successfully"
 rm -rf $MY_PID_FILE
 exit 0

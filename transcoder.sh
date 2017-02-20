@@ -5,7 +5,7 @@
 # upload to external site
 # 
 # Arguments: id /path/filename.mp4 rsync://put_path/ transcode_to_format
-# eg decoder.sh 123456789 /get_path/ filename.mp4 rsync://user@domain.com:/put_path/ h264
+# eg transcoder.sh 123456789 /get_path/filename.mp4 rsync://user@domain.com:/put_path/ h264
 BASENAME=`basename $0`
 cd `dirname $0`
 DIRNAME=`pwd`
@@ -51,12 +51,32 @@ if [ "x$DEBUG" != "x1" ]; then
 fi	
 
 
+#ffmpeg -y -i Butterfly_HD_1080p.mp4 -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b 200000 -threads 64 butterflyiphone_320.mp4
+#ffmpeg -y -i Butterfly_HD_1080p.mp4 -s 640x360 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b 520000 -threads 64 butterflyiphone_640.mp4
+#ffmpeg -y -i Butterfly_HD_1080p.mp4 -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b 270000 -threads 64 butterfly_400.mp4
+#ffmpeg -y -i Butterfly_HD_1080p.mp4 -s 420x270 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b 570000 -threads 64 butterfly_700.mp4
+#ffmpeg -y -i Butterfly_HD_1080p.mp4 -s 720x406 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b 1000000 -threads 64 butterfly_1100.mp4
+#ffmpeg -y -i Butterfly_HD_1080p.mp4 -s 1024x576 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b 1200000 -threads 64 butterfly_1300.mp4
+#ffmpeg -y -i Butterfly_HD_1080p.mp4 -s 1080x608 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b 1400000 -threads 64 butterfly_1500.mp4
+#ffmpeg -i Butterfly_HD_1080p.mp4 -s 212x120 -y -strict experimental -acodec aac -ab 96k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -g 48 -b 85000 -level 30 -threads 64 butterfly_175k.mp4
+
+
+
 OUTPUT_FILENAME=''
-if [ "x$TRANSCODE_FORMAT" == "xh264" ] ; then
-	OUTPUT_FILENAME="${FILENAME}_${TRANSCODE_FORMAT}.mp4" 
-	# we need parse filename and change it
-	CMD="timeout $TIMEOUT_TRANSCODE $FFMPEG_DIR/ffmpeg -i $FILENAME -vf 'scale:1920x1080' -c:v libx264 -pix_fmt yuv420p -strict -2 $OUTPUT_FILENAME"
+if [ "x$TRANSCODE_FORMAT" == "x320" ] ; then
+	OUTPUT_FILENAME=`$DIRNAME/get_filename.pl $FILENAME $TRANSCODE_FORMAT`
+	if [  $? -ne 0  ]; then
+		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
+		rm -rf $MY_PID_FILE
+		exit 1
+	fi	
+	CMD="timeout $TIMEOUT_TRANSCODE $FFMPEG_DIR/ffmpeg  -loglevel warning  -y  -i $FILENAME -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b 200000 -threads 64  $OUTPUT_FILENAME"
 fi	
+
+
+# there we need add more formats
+
+
 
 if [ "x$OUTPUT_FILENAME" == "x" ]; then
 	w2log "Error: Unknown transcode format '$TRANSCODE_FORMAT'. Exiting"
@@ -100,6 +120,6 @@ if [  $? -ne 0  ]; then
 fi	
 
 
-w2log "Process $$ finished successfully"
+#w2log "Process $$ finished successfully"
 rm -rf $MY_PID_FILE
 exit 0

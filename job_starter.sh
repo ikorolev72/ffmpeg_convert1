@@ -14,7 +14,7 @@ source "$DIRNAME/common.sh"
 
 WORKING_DIR=$DATA_DIR/job_starter
 PROCESS_LOG=$WORKING_DIR/job_starter.log
-VIDEO_EXT="'.mp4\\$|.avi\\$|.mkv\\$'"
+VIDEO_EXT='\.mp4$|\.avi$|\.mkv$'
 
 if [ "x$DEBUG" == "x1" ]; then
 	echo "mkdir -p '$WORKING_DIR'"
@@ -34,11 +34,58 @@ fi
 echo  $$  > $MY_PID_FILE
 
 
-CMD="timeout $TIMEOUT_GET_LS $RSYNC --list-only $REMOTE_SOURCE | /bin/egrep -i $VIDEO_EXT > $WORKING_DIR/ls.tmp"
+########## check failed jobs
+# check downloader jobs
+for pid_file in  `find $DATA_DIR -name '*.downloader.pid' -o -name '*.transcoder.pid'  -o -name '*.uploader.pid'`; do
+	ps --pid `cat $pid_file` -o cmd h >/dev/null 2>&1 
+	if [ $? -ne 0 ]; then
+		# remove pid-files for failed job ( process crashed or killed )
+		rm $pid_file
+	fi		
+done
+# end of check
+
+
+########## run jobs in the queues
+# queue downloader
+RUNNING_JOBS=`find $DATA_DIR -name "*.downloader.pid" | wc -l`
+for i in `seq $RUNNING_JOBS $JOBS_LIMIT_DOWNLOADER` ; do
+	JOB=`$DIRNAME/getfromqueue.pl downloader`
+	if [ $? -ne 0 ]; then
+		# queue is empty
+		break
+	fi
+	$JOB >> $PROCESS_LOG 2>&1 &
+done
+
+# queue transcoder
+RUNNING_JOBS=`find $DATA_DIR -name "*.transcoder.pid" | wc -l`
+for i in `seq $RUNNING_JOBS $JOBS_LIMIT_TRANSCODER` ; do
+	JOB=`$DIRNAME/getfromqueue.pl transcoder`
+	if [ $? -ne 0 ]; then
+		# queue is empty
+		break
+	fi
+	$JOB >> $PROCESS_LOG 2>&1 &
+done
+# queue uploader
+RUNNING_JOBS=`find $DATA_DIR -name "*.uploader.pid" | wc -l`
+for i in `seq $RUNNING_JOBS $JOBS_LIMIT_UPLOADER` ; do
+	JOB=`$DIRNAME/getfromqueue.pl uploader`
+	if [ $? -ne 0 ]; then
+		# queue is empty
+		break
+	fi
+	$JOB >> $PROCESS_LOG 2>&1 &
+done
+# end of job starter
+
+
+CMD="timeout $TIMEOUT_GET_LS $RSYNC --list-only $REMOTE_SOURCE" 
 if [ "x$DEBUG" == "x1" ]; then
-	echo $CMD
+	echo $CMD  "| /bin/egrep -i $VIDEO_EXT > $WORKING_DIR/ls.tmp"
 else
-	$CMD
+	$CMD  | /bin/egrep -i $VIDEO_EXT > $WORKING_DIR/ls.tmp
 fi
 
 # now we check if file don't changes during a minute 
@@ -49,6 +96,7 @@ if [ ! -f $WORKING_DIR/ls.tmp.old ]; then
 		echo $CMD
 	else
 		$CMD
+		rm $MY_PID_FILE
 		exit 0
 	fi
 fi
@@ -63,93 +111,27 @@ do
 		continue
 	fi
 	FILENAME=`echo $next | awk '{ print $5 }'`
-	CMD="$DIRNAME/send2queue.pl downloader '$DIRNAME/downloader.sh $ID $REMOTE_SOURCE $FILENAME REMOTE_TARGET'"
+	CMD="$DIRNAME/send2queue.pl downloader '$DIRNAME/downloader.sh $ID $REMOTE_SOURCE $FILENAME $REMOTE_TARGET'"
 	if [ "x$DEBUG" == "x1" ]; then
-		echo "mkdir $DATA_DIR/$ID"
 		echo $CMD 
+		echo "mkdir $DATA_DIR/$ID"
 	else
 		w2log "Put job in queue: downloader file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
-		mkdir $DATA_DIR/$ID
 		$CMD >> $PROCESS_LOG 2>&1
+		if [ $? -ne 0 ]; then
+			w2log "Error: Cannot put job in queue: downloader, file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"			
+			continue
+		fi		
+		mkdir $DATA_DIR/$ID
 	fi			
 done
-#for next in `cat $WORKING_DIR/ls.tmp`
-#do
-#	ID=`echo $next | /usr/bin/md5sum | awk '{ print $1 }'`
-#	if [ -d $DATA_DIR/$ID ]; then
-#		continue
-#	fi
-#	# check if this file exist more than 1 minute
-#	grep "$next" $WORKING_DIR/ls.tmp.old >/dev/null 2>&1
-#	if [  $? -ne 0  ]; then
-#		continue
-#	fi		
-#	mkdir $DATA_DIR/$ID
-#	FILENAME=`echo $next | awk '{ print $5 }'`
-#	CMD="$DIRNAME/send2queue.pl downloader '$DIRNAME/downloader.sh $ID $REMOTE_SOURCE $FILENAME REMOTE_TARGET'"
-#	if [ "x$DEBUG" == "x1" ]; then
-#		echo $CMD 
-#	else
-#		w2log "Put job in queue: downloader file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
-#		$CMD >> $PROCESS_LOG 2>&1
-#	fi		
-#done 
-CMD="mv $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old"
-if [ "x$DEBUG" == "x1" ]; then
-	echo $CMD 
-else
-	w2log "Put job in queue: downloader file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
-	$CMD >> $PROCESS_LOG 2>&1
-fi
 
 
-########## check failed jobs
-# check downloader jobs
-for pid_file in  `find $DATA_DIR -name '*.downloader.pid' -o -name '*.transcoder.pid'  -o -name '*.uploader.pid'`; do
-	ps --pid `cat $pid_file` -o cmd h >/dev/null 2>&1 
-	if [ $? -ne 0 ]; then
-		# failed job ( process crashed or killed )
-		rm $pid_file
-	fi		
-done
-# end of check
-
-########## run jobs in the queues
-# queue downloader
-RUNNING_JOBS=`find $DATA_DIR -name "*.downloader.pid" | wc -l`
-for i in `seq $RUNNING_JOBS $JOBS_LIMIT_DOWNLOADER` ; do
-	JOB=`$DIRNAME/send2queue.pl downloader`
-	if [ $? -ne 0 ]; then
-		# queue is empty
-		break
-	fi
-	$JOB >> $PROCESS_LOG 2>&1 &
-done
-
-# queue transcoder
-RUNNING_JOBS=`find $DATA_DIR -name "*.transcoder.pid" | wc -l`
-for i in `seq $RUNNING_JOBS $JOBS_LIMIT_TRANSCODER` ; do
-	JOB=`$DIRNAME/send2queue.pl transcoder`
-	if [ $? -ne 0 ]; then
-		# queue is empty
-		break
-	fi
-	$JOB >> $PROCESS_LOG 2>&1 &
-done
-# queue uploader
-RUNNING_JOBS=`find $DATA_DIR -name "*.uploader.pid" | wc -l`
-for i in `seq $RUNNING_JOBS $JOBS_LIMIT_UPLOADER` ; do
-	JOB=`$DIRNAME/send2queue.pl uploader`
-	if [ $? -ne 0 ]; then
-		# queue is empty
-		break
-	fi
-	$JOB >> $PROCESS_LOG 2>&1 &
-done
-# end of job starter
 
 
-########## run jobs
-w2log "Process $$ finished successfully"
+
+
+#
+#w2log "Process $$ finished successfully"
 rm -rf $MY_PID_FILE
 exit 0
