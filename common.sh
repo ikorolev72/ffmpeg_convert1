@@ -10,8 +10,8 @@ export REMOTE_TARGET='/tmp/3/'
 if [ -d /home/hd25/stainlast12/ffmpeg_convert1 ]; then
 	export PROJECT_DIR=/home/hd25/stainlast12/ffmpeg_convert1
 	export FFMPEG_DIR=$PROJECT_DIR/ffmpeg-3.2.4-64bit-static
-	export REMOTE_SOURCE='stainlast12@185.21.218.136:/usr/local/WowzaStreamingEngine/content/'
-	export REMOTE_TARGET='stainlast12@185.21.218.136:/usr/local/WowzaStreamingEngine/transcoded/'
+	export REMOTE_SOURCE='stainlast12@111.11.111.111:/usr/local/WowzaStreamingEngine/content/'
+	export REMOTE_TARGET='stainlast12@111.11.111.111:/usr/local/WowzaStreamingEngine/transcoded/'
 fi
 export DATA_DIR=$PROJECT_DIR/data
 export TIMEOUT_GET_FILE=3600 # 1hour

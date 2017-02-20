@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 ## This is a basic Producer
 use strict;
 use warnings;
