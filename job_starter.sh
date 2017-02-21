@@ -91,7 +91,7 @@ fi
 # now we check if file don't changes during a minute 
 if [ ! -f $WORKING_DIR/ls.tmp.old ]; then
 	# first start
-	CMD="mv $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old"
+	CMD="mv -f $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old"
 	if [ "x$DEBUG" == "x1" ]; then
 		echo $CMD
 	else
@@ -110,28 +110,27 @@ do
 	if [ -d $DATA_DIR/$ID ]; then
 		continue
 	fi
-	FILENAME=`echo $next | awk '{ print $5 }'`
-	CMD="$DIRNAME/send2queue.pl downloader '$DIRNAME/downloader.sh $ID $REMOTE_SOURCE $FILENAME $REMOTE_TARGET'"
+	FILENAME=`echo $next  | /usr/bin/perl -ne '/^\S+\s+\S+\s+\S+\s+\S+\s+(.+)$/; print unpack( "h*","$1" );'`
+	# we use unpacked in hex format filename (for spaces and special chars)
+	# for decode use perl -e 'print pack( "h*", "hex_string" )."\n";'
+	#
 	if [ "x$DEBUG" == "x1" ]; then
-		echo $CMD 
+		echo ${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID $REMOTE_SOURCE $FILENAME $REMOTE_TARGET"
 		echo "mkdir $DATA_DIR/$ID"
 	else
-		w2log "Put job in queue: downloader file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"
-		$CMD >> $PROCESS_LOG 2>&1
+		w2log "Put job in queue downloader: ${DIRNAME}/downloader.sh $ID $REMOTE_SOURCE $FILENAME $REMOTE_TARGET"
+		${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID $REMOTE_SOURCE $FILENAME $REMOTE_TARGET" >> ${PROCESS_LOG} 2>&1
+		
 		if [ $? -ne 0 ]; then
-			w2log "Error: Cannot put job in queue: downloader, file '$FILENAME' from '$REMOTE_SOURCE' to '$DATA_DIR/$ID'"			
+			w2log "Error: Cannot put job in queue. See $PROCESS_LOG"
 			continue
 		fi		
-		mkdir $DATA_DIR/$ID
+		mkdir ${DATA_DIR}/${ID}
 	fi			
 done
 
 
 
-
-
-
 #
-#w2log "Process $$ finished successfully"
 rm -rf $MY_PID_FILE
 exit 0

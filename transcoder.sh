@@ -63,14 +63,14 @@ fi
 
 
 OUTPUT_FILENAME=''
-if [ "x$TRANSCODE_FORMAT" == "x320" ] ; then
-	OUTPUT_FILENAME=`$DIRNAME/get_filename.pl $FILENAME $TRANSCODE_FORMAT`
+if [ "x${TRANSCODE_FORMAT}" == "x320" ] ; then
+	OUTPUT_FILENAME=`${DIRNAME}/get_filename.pl $FILENAME ${TRANSCODE_FORMAT}`
 	if [  $? -ne 0  ]; then
 		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout $TIMEOUT_TRANSCODE $FFMPEG_DIR/ffmpeg  -loglevel warning  -y  -i $FILENAME -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b 200000 -threads 64  $OUTPUT_FILENAME"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b 200000 -threads 4  ${OUTPUT_FILENAME}"
 fi	
 
 
@@ -78,8 +78,9 @@ fi
 
 
 
-if [ "x$OUTPUT_FILENAME" == "x" ]; then
-	w2log "Error: Unknown transcode format '$TRANSCODE_FORMAT'. Exiting"
+if [ "x${OUTPUT_FILENAME}" == "x" ]; then
+	w2log "Error: Empty output filename, that mean unknown transcode format '$TRANSCODE_FORMAT'. Exiting"
+	rm -rf $FILENAME
 	rm -rf $MY_PID_FILE
 	exit 1
 fi
@@ -93,6 +94,7 @@ fi
 
 if [  $? -ne 0 ]; then
 	w2log "Error: Cannot transcode file '$FILENAME' to '$OUTPUT_FILENAME' with '$TRANSCODE_FORMAT'. See $PROCESS_LOG"
+	rm -rf $FILENAME 
 	rm -rf $MY_PID_FILE
 	exit 1
 else 
@@ -106,15 +108,15 @@ fi
 
 ###################### put job in the queue for upload to remote server
 
-CMD="$DIRNAME/send2queue.pl uploader '$DIRNAME/uploader.sh $ID $OUTPUT_FILENAME $PUT_PATH'"
 if [ "x$DEBUG" == "x1" ]; then
-	echo $CMD 
+	echo ${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME} ${PUT_PATH}"
 else
-	w2log "Put job in queue: uploader '$OUTPUT_FILENAME' to '$PUT_PATH'"
-	$CMD >> $PROCESS_LOG 2>&1
+	w2log "Put job in queue uploader: ${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME} ${PUT_PATH}"
+	${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME} ${PUT_PATH}" >> ${PROCESS_LOG} 2>&1
 fi
+
 if [  $? -ne 0  ]; then
-	w2log "Error: Cannot put job in the queue. See $PROCESS_LOG"
+	w2log "Error: Cannot put job in queue. See $PROCESS_LOG"
 	rm -rf $MY_PID_FILE
 	exit 1
 fi	

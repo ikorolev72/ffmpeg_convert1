@@ -42,7 +42,7 @@ echo  "$$"  > $MY_PID_FILE
 
 
 if [ "x$DEBUG" != "x1" ]; then
-	if [ ! -f "$OUTPUT_FILENAME"  ]; then
+	if [ ! -f $OUTPUT_FILENAME  ]; then
 		w2log "File $OUTPUT_FILENAME do not exist"
 		rm -rf $MY_PID_FILE
 		exit 1
@@ -51,7 +51,7 @@ fi
 
 
 ###################### put file to remote server
-CMD="timeout $TIMEOUT_PUT_FILE $RSYNC $OUTPUT_FILENAME $PUT_PATH"
+CMD="timeout ${TIMEOUT_PUT_FILE} $RSYNC ${OUTPUT_FILENAME} ${PUT_PATH}"
 if [ "x$DEBUG" == "x1" ]; then
 	echo $CMD
 else
@@ -61,11 +61,13 @@ fi
 
 if [  $? -ne 0  ]; then
 	w2log "Error: Cannot upload '$OUTPUT_FILENAME' to '$PUT_PATH'. See $PROCESS_LOG"
+	#rm -rf $OUTPUT_FILENAME
 	rm -rf $MY_PID_FILE
 	exit 1
 fi	
 
 
 #w2log "Process $$ finished successfully"
+rm -rf $OUTPUT_FILENAME
 rm -rf $MY_PID_FILE
 exit 0
