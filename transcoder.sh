@@ -70,12 +70,79 @@ if [ "x${TRANSCODE_FORMAT}" == "x320" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b 200000 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b:v 200000 -threads 4  ${OUTPUT_FILENAME}"
+fi
+
+if [ "x${TRANSCODE_FORMAT}" == "x640" ] ; then
+	OUTPUT_FILENAME=`${DIRNAME}/get_filename.pl $FILENAME ${TRANSCODE_FORMAT}`
+	if [  $? -ne 0  ]; then
+		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
+		rm -rf $MY_PID_FILE
+		exit 1
+	fi	
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 640x360 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b:v 520000 -threads  4  ${OUTPUT_FILENAME}"
 fi	
 
+if [ "x${TRANSCODE_FORMAT}" == "x400" ] ; then
+	OUTPUT_FILENAME=`${DIRNAME}/get_filename.pl $FILENAME ${TRANSCODE_FORMAT}`
+	if [  $? -ne 0  ]; then
+		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
+		rm -rf $MY_PID_FILE
+		exit 1
+	fi	
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 270000 -threads 4  ${OUTPUT_FILENAME}"
+fi
 
-# there we need add more formats
+if [ "x${TRANSCODE_FORMAT}" == "x700" ] ; then
+	OUTPUT_FILENAME=`${DIRNAME}/get_filename.pl $FILENAME ${TRANSCODE_FORMAT}`
+	if [  $? -ne 0  ]; then
+		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
+		rm -rf $MY_PID_FILE
+		exit 1
+	fi	
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 420x270 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 570000 -threads 4  ${OUTPUT_FILENAME}"
+fi
 
+if [ "x${TRANSCODE_FORMAT}" == "x1100" ] ; then
+	OUTPUT_FILENAME=`${DIRNAME}/get_filename.pl $FILENAME ${TRANSCODE_FORMAT}`
+	if [  $? -ne 0  ]; then
+		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
+		rm -rf $MY_PID_FILE
+		exit 1
+	fi	
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 720x406 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1000000 -threads 4  ${OUTPUT_FILENAME}"
+fi
+
+if [ "x${TRANSCODE_FORMAT}" == "x1300" ] ; then
+	OUTPUT_FILENAME=`${DIRNAME}/get_filename.pl $FILENAME ${TRANSCODE_FORMAT}`
+	if [  $? -ne 0  ]; then
+		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
+		rm -rf $MY_PID_FILE
+		exit 1
+	fi	
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 1024x576 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1200000 -threads 4  ${OUTPUT_FILENAME}"
+fi
+
+if [ "x${TRANSCODE_FORMAT}" == "x1500" ] ; then
+	OUTPUT_FILENAME=`${DIRNAME}/get_filename.pl $FILENAME ${TRANSCODE_FORMAT}`
+	if [  $? -ne 0  ]; then
+		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
+		rm -rf $MY_PID_FILE
+		exit 1
+	fi	
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 1080x608 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1400000 -threads 4  ${OUTPUT_FILENAME}"
+fi
+
+if [ "x${TRANSCODE_FORMAT}" == "x175k" ] ; then
+	OUTPUT_FILENAME=`${DIRNAME}/get_filename.pl $FILENAME ${TRANSCODE_FORMAT}`
+	if [  $? -ne 0  ]; then
+		w2log "Error: Incorrect filename '$FILENAME'. Cannot get extention for this file."
+		rm -rf $MY_PID_FILE
+		exit 1
+	fi	
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 212x120 -y -strict experimental -acodec aac -ab 96k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -g 48 -b 85000:v -level 30 -threads 4  ${OUTPUT_FILENAME}"
+fi
+# End of 'define transcoding command'
 
 
 if [ "x${OUTPUT_FILENAME}" == "x" ]; then
