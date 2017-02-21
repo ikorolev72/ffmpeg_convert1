@@ -89,16 +89,17 @@ else
 fi
 
 # now we check if file don't changes during a minute 
+CMD="cp -pf $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old"
 if [ ! -f $WORKING_DIR/ls.tmp.old ]; then
 	# first start
-	CMD="mv -f $WORKING_DIR/ls.tmp $WORKING_DIR/ls.tmp.old"
-	if [ "x$DEBUG" == "x1" ]; then
-		echo $CMD
-	else
-		$CMD
-		rm $MY_PID_FILE
-		exit 0
-	fi
+	$CMD
+	rm $MY_PID_FILE
+	exit 0
+fi
+if [ "x$DEBUG" == "x1" ]; then
+	echo $CMD
+else
+	$CMD
 fi
 
 

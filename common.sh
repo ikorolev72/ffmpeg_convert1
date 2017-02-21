@@ -28,7 +28,7 @@ export LOG=$DATA_DIR/ffmpeg_convert1.log
 
 w2log() {
 	DATE=`date +%Y-%m-%d_%H:%M:%S`
-		echo "$DATE $@"
+		#echo "$DATE $@"
 		echo "$DATE $@" >> $LOG
 	return 0
 }
