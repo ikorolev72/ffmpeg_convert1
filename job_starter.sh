@@ -116,11 +116,11 @@ do
 	# for decode use perl -e 'print pack( "h*", "hex_string" )."\n";'
 	#
 	if [ "x$DEBUG" == "x1" ]; then
-		echo ${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID $REMOTE_SOURCE $FILENAME $REMOTE_TARGET"
+		echo ${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID $FILENAME "
 		echo "mkdir $DATA_DIR/$ID"
 	else
-		w2log "Put job in queue downloader: ${DIRNAME}/downloader.sh $ID $REMOTE_SOURCE $FILENAME $REMOTE_TARGET"
-		${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID $REMOTE_SOURCE $FILENAME $REMOTE_TARGET" >> ${PROCESS_LOG} 2>&1
+		w2log "Put job in queue downloader: ${DIRNAME}/downloader.sh $ID $FILENAME "
+		${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID  $FILENAME " >> ${PROCESS_LOG} 2>&1
 		
 		if [ $? -ne 0 ]; then
 			w2log "Error: Cannot put job in queue. See $PROCESS_LOG"

@@ -4,8 +4,8 @@
 # transcode video file into another format
 # upload to external site
 # 
-# Arguments: id /path/filename.mp4 rsync://put_path/ transcode_to_format
-# eg transcoder.sh 123456789 /get_path/filename.mp4 rsync://user@domain.com:/put_path/ h264
+# Arguments: id /path/filename.mp4 transcode_to_format
+# eg transcoder.sh 123456789 /get_path/filename.mp4  640
 BASENAME=`basename $0`
 cd `dirname $0`
 DIRNAME=`pwd`
@@ -16,8 +16,7 @@ source "$DIRNAME/common.sh"
 # arguments
 ID=$1
 FILENAME=$2
-PUT_PATH=$3
-TRANSCODE_FORMAT=$4
+TRANSCODE_FORMAT=$3
 
 WORKING_DIR=$DATA_DIR/$ID
 PROCESS_LOG=$WORKING_DIR/$$.log
@@ -25,7 +24,7 @@ PROCESS_LOG=$WORKING_DIR/$$.log
 w2log "$@"
 
 # check the arguments
-if [[ "x$ID" == "x" || "x$FILENAME" == "x" || "x$PUT_PATH" == "x" || "x$TRANSCODE_FORMAT" == "x" ]] ; then
+if [[ "x$ID" == "x" || "x$FILENAME" == "x" || "x$TRANSCODE_FORMAT" == "x" ]] ; then
 	echo "Usage:$0 id  file.mp4 rsync://user@domain.com:/path_for_transcoded_files/ transcode_to_format"
 	exit 1
 fi	
@@ -140,7 +139,7 @@ if [ "x${TRANSCODE_FORMAT}" == "x175k" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 212x120 -y -strict experimental -acodec aac -ab 96k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -g 48 -b 85000:v -level 30 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 212x120 -y -strict experimental -acodec aac -ab 96k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -g 48 -b:v 85000 -level 30 -threads 4  ${OUTPUT_FILENAME}"
 fi
 # End of 'define transcoding command'
 
@@ -176,10 +175,10 @@ fi
 ###################### put job in the queue for upload to remote server
 
 if [ "x$DEBUG" == "x1" ]; then
-	echo ${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME} ${PUT_PATH}"
+	echo ${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}"
 else
-	w2log "Put job in queue uploader: ${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME} ${PUT_PATH}"
-	${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME} ${PUT_PATH}" >> ${PROCESS_LOG} 2>&1
+	w2log "Put job in queue uploader: ${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}"
+	${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}" >> ${PROCESS_LOG} 2>&1
 fi
 
 if [  $? -ne 0  ]; then
