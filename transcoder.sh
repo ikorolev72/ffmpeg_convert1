@@ -45,8 +45,9 @@ DATE=`date +%Y-%m-%d_%H:%M:%S`
 MY_PID_FILE="${WORKING_DIR}/$$.transcoder.pid"
 echo  "$$"  > $MY_PID_FILE
 
+cd $WORKING_DIR
 
-FILENAME="${DOWNLOAD_TO}.${TRANSCODE_FORMAT}"
+FILENAME="${RELATIVE_DOWNLOAD_TO}.${TRANSCODE_FORMAT}"
 if [ "x$DEBUG" != "x1" ]; then
 	if [ ! -f "$FILENAME"  ]; then
 		w2log "File $FILENAME do not exist"

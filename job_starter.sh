@@ -83,9 +83,9 @@ done
 
 CMD="timeout $TIMEOUT_GET_LS $RSYNC -r --list-only $REMOTE_SOURCE" 
 if [ "x$DEBUG" == "x1" ]; then
-	echo $CMD  "| /bin/egrep -i $VIDEO_EXT | /bin/egrep -v EXCLUDE_DIRS > $WORKING_DIR/ls.tmp"
+	echo $CMD  "| /bin/egrep -i $VIDEO_EXT | /bin/egrep -v $EXCLUDE_DIRS > $WORKING_DIR/ls.tmp"
 else
-	$CMD  | /bin/egrep -i $VIDEO_EXT > $WORKING_DIR/ls.tmp
+	$CMD  | /bin/egrep -i $VIDEO_EXT | /bin/egrep -v $EXCLUDE_DIRS > $WORKING_DIR/ls.tmp
 fi
 
 # now we check if file don't changes during a minute 
@@ -128,11 +128,15 @@ do
 			continue
 		fi
 		[ -d "${DATA_DIR}/${ID}" ] || mkdir -p "${DATA_DIR}/${ID}"
+		#OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+)\.(\w+)$/; my $filename=$1; my $ext=$2; $filename=~s/[^\w\/]/_/g; print "$filename.$ext";'`
+		#OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; print "$2";'`
 		JOB_SETTINGS_FILE=${DATA_DIR}/${ID}/job_settings.sh
-		OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+)\.(\w+)$/; my $filename=$1; my $ext=$2; $filename=~s/\W/_/g; print "$filename.$ext";'`
-		echo "export REMOTE_SOURCE_FILE=${REMOTE_SOURCE}/${FILENAME}" > $JOB_SETTINGS_FILE
+		RELATIVE_DIR=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; print "$1";'`
+		OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; print "$2";'`
+		echo "export REMOTE_SOURCE_FILE='${REMOTE_SOURCE}/${FILENAME}'" > $JOB_SETTINGS_FILE
 		echo "export DOWNLOAD_TO=${DATA_DIR}/${ID}/${OUTPUT_FILENAME} " >> $JOB_SETTINGS_FILE
-		#echo "GET_FILE=${REMOTE_TARGET}/${FILENAME}" > $JOB_SETTINGS_FILE
+		echo "export RELATIVE_DOWNLOAD_TO=${OUTPUT_FILENAME} " >> $JOB_SETTINGS_FILE
+		echo "export RELATIVE_DIR=${RELATIVE_DIR}" >> $JOB_SETTINGS_FILE
 	fi			
 done
 

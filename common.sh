@@ -5,7 +5,7 @@
 export PROJECT_DIR=/home/osboxes/ffmpeg_convert1
 export FFMPEG_DIR=/usr/bin
 export REMOTE_SOURCE='/tmp/2/'
-export REMOTE_TARGET='/tmp/3/'
+export REMOTE_TARGET='/tmp/2/transcoded-content/'
 
 if [ -d /home/hd25/stainlast12/ffmpeg_convert1 ]; then
 	export PROJECT_DIR=/home/hd25/stainlast12/ffmpeg_convert1

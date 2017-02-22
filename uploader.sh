@@ -48,25 +48,37 @@ if [ "x$DEBUG" != "x1" ]; then
 	fi	
 fi	
 
+JOB_SETTINGS_FILE=${WORKING_DIR}/job_settings.sh
+if [ ! -f $JOB_SETTINGS_FILE ]; then
+	w2log "File $JOB_SETTINGS_FILE do not exist. Cannot set parameters"
+	exit 1
+fi
+source $JOB_SETTINGS_FILE
+
 
 ###################### put file to remote server
-CMD="timeout ${TIMEOUT_PUT_FILE} $RSYNC ${OUTPUT_FILENAME} ${REMOTE_TARGET}"
-if [ "x$DEBUG" == "x1" ]; then
-	echo $CMD
-else
-	w2log "Start upload '$OUTPUT_FILENAME' to '$REMOTE_TARGET'"
-	$CMD >> $PROCESS_LOG 2>&1
-fi
+cd $WORKING_DIR
 
-if [  $? -ne 0  ]; then
-	w2log "Error: Cannot upload '$OUTPUT_FILENAME' to '$REMOTE_TARGET'. See $PROCESS_LOG"
-	#rm -rf $OUTPUT_FILENAME
-	rm -rf $MY_PID_FILE
-	exit 1
-fi	
+for i in `seq 4`; do
+	CMD="timeout ${TIMEOUT_PUT_FILE} $RSYNC -aR ${OUTPUT_FILENAME} ${REMOTE_TARGET}"
+	if [ "x$DEBUG" == "x1" ]; then
+		echo $CMD
+	else
+		w2log "Start upload '$OUTPUT_FILENAME' to '$REMOTE_TARGET' . Attempt $i"
+		$CMD >> $PROCESS_LOG 2>&1
+	fi
 
+	if [  $? -eq 0  ]; then
+		w2log "File '$OUTPUT_FILENAME'  uploaded to '$REMOTE_TARGET'"
+		rm -rf $OUTPUT_FILENAME
+		rm -rf $MY_PID_FILE
+		exit 0
+	fi
+	# if unsuccess, try again 4 time
+	let SLEEP_TIME=" 120 * $i " 
+	sleep $SLEEP_TIME
+done
 
-#w2log "Process $$ finished successfully"
-rm -rf $OUTPUT_FILENAME
+w2log "Error: Cannot upload '$OUTPUT_FILENAME' to '$REMOTE_TARGET'. See $PROCESS_LOG"
 rm -rf $MY_PID_FILE
-exit 0
+exit 1

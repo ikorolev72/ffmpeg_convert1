@@ -46,38 +46,32 @@ DATE=`date +%Y-%m-%d_%H:%M:%S`
 MY_PID_FILE="${WORKING_DIR}/$$.downloader.pid"
 echo  "$$"  > $MY_PID_FILE
 
-# check if filename in simple text or "hex packed" ( check if found '.' in string)
-#echo $HEX_FILENAME | grep "\." >/dev/null 2>&1
-#if [  $? -ne 0  ]; then
-#	FILENAME=`echo $HEX_FILENAME | /usr/bin/perl -ne 'print pack( "h*",$_);'`
-#else
-#	FILENAME=$HEX_FILENAME
-#fi	
+cd $WORKING_DIR
 
-#OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+)\.(\w+)$/; my $filename=$1; my $ext=$2; $filename=~s/\W/_/g; print "$filename.$ext";'`
-# output filename with fixed special chars and spaces
+[ -d "${WORKING_DIR}/${RELATIVE_DIR}" ] || mkdir -p "${WORKING_DIR}/${RELATIVE_DIR}"
 
-if [ "x$DEBUG" == "x1" ]; then
-	echo timeout ${TIMEOUT_GET_FILE} $RSYNC "${REMOTE_SOURCE_FILE}" ${DOWNLOAD_TO}
-else
-	w2log "Start download '${RREMOTE_SOURCE_FILE}' and save to '${DOWNLOAD_TO}'"
-	timeout ${TIMEOUT_GET_FILE} $RSYNC "${REMOTE_SOURCE_FILE}" ${DOWNLOAD_TO} >> $PROCESS_LOG 2>&1
-fi
+for i in `seq 4`; do
+	if [ "x$DEBUG" == "x1" ]; then
+		echo timeout ${TIMEOUT_GET_FILE} $RSYNC "${REMOTE_SOURCE_FILE}" ${DOWNLOAD_TO}
+	else
+		w2log "Start download '${REMOTE_SOURCE_FILE}' and save to '${DOWNLOAD_TO}'. Attempt $i"
+		timeout ${TIMEOUT_GET_FILE} $RSYNC "${REMOTE_SOURCE_FILE}" ${DOWNLOAD_TO} >> $PROCESS_LOG 2>&1
+	fi
 
-if [  $? -ne 0  ]; then
+	if [  $? -eq 0  ]; then
+		break
+	fi
+	# if unsuccess, try again 4 time
 	w2log "Error: Cannot get file '${REMOTE_SOURCE_FILE}'. See $PROCESS_LOG"
+	let SLEEP_TIME=" 120 * $i " 
+	sleep $SLEEP_TIME	
+done
+
+
+if [ ! -f "${DOWNLOAD_TO}"  ]; then
+	w2log "File ${DOWNLOAD_TO} do not exist"
 	rm -rf $MY_PID_FILE
 	exit 1
-fi	
-
-
-
-if [ "x$DEBUG" != "x1" ]; then
-	if [ ! -f "${DOWNLOAD_TO}"  ]; then
-		w2log "File ${DOWNLOAD_TO} do not exist"
-		rm -rf $MY_PID_FILE
-		exit 1
-	fi	
 fi	
 
 
