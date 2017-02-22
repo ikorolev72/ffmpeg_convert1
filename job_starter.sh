@@ -15,7 +15,7 @@ source "$DIRNAME/common.sh"
 WORKING_DIR=$DATA_DIR/job_starter
 PROCESS_LOG=$WORKING_DIR/job_starter.log
 VIDEO_EXT='\.mp4$|\.avi$|\.mkv$'
-
+EXCLUDE_DIRS='transcoded-content/|transfer33/|transfre/|'
 if [ "x$DEBUG" == "x1" ]; then
 	echo "mkdir -p '$WORKING_DIR'"
 else
