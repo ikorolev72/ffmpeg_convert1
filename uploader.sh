@@ -19,6 +19,7 @@ OUTPUT_FILENAME=$2
 WORKING_DIR=$DATA_DIR/$ID
 PROCESS_LOG=$WORKING_DIR/$$.log
 
+
 w2log "$@"
 
 # check the arguments

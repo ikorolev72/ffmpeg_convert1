@@ -4,8 +4,8 @@
 # transcode video file into another format
 # upload to external site
 # 
-# Arguments: id /path/filename.mp4 transcode_to_format
-# eg transcoder.sh 123456789 /get_path/filename.mp4  640
+# Arguments: id  transcode_to_format
+# eg transcoder.sh 123456789  640
 BASENAME=`basename $0`
 cd `dirname $0`
 DIRNAME=`pwd`
@@ -15,8 +15,7 @@ source "$DIRNAME/common.sh"
 
 # arguments
 ID=$1
-FILENAME=$2
-TRANSCODE_FORMAT=$3
+TRANSCODE_FORMAT=$2
 
 WORKING_DIR=$DATA_DIR/$ID
 PROCESS_LOG=$WORKING_DIR/$$.log
@@ -24,7 +23,7 @@ PROCESS_LOG=$WORKING_DIR/$$.log
 w2log "$@"
 
 # check the arguments
-if [[ "x$ID" == "x" || "x$FILENAME" == "x" || "x$TRANSCODE_FORMAT" == "x" ]] ; then
+if [[ "x$ID" == "x" || "x$TRANSCODE_FORMAT" == "x" ]] ; then
 	echo "Usage:$0 id  file.mp4 rsync://user@domain.com:/path_for_transcoded_files/ transcode_to_format"
 	exit 1
 fi	
@@ -35,12 +34,19 @@ else
 	[ -d "$WORKING_DIR" ] || mkdir -p "$WORKING_DIR"
 fi	
 
+JOB_SETTINGS_FILE=${WORKING_DIR}/job_settings.sh
+if [ ! -f $JOB_SETTINGS_FILE ]; then
+	w2log "File $JOB_SETTINGS_FILE do not exist. Cannot set parameters"
+	exit 1
+fi
+source $JOB_SETTINGS_FILE
+
 DATE=`date +%Y-%m-%d_%H:%M:%S`
 MY_PID_FILE="${WORKING_DIR}/$$.transcoder.pid"
 echo  "$$"  > $MY_PID_FILE
 
 
-
+FILENAME="${DOWNLOAD_TO}.${TRANSCODE_FORMAT}"
 if [ "x$DEBUG" != "x1" ]; then
 	if [ ! -f "$FILENAME"  ]; then
 		w2log "File $FILENAME do not exist"

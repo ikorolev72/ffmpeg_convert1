@@ -15,7 +15,7 @@ source "$DIRNAME/common.sh"
 WORKING_DIR=$DATA_DIR/job_starter
 PROCESS_LOG=$WORKING_DIR/job_starter.log
 VIDEO_EXT='\.mp4$|\.avi$|\.mkv$'
-EXCLUDE_DIRS='transcoded-content/|transfer33/|transfre/|'
+EXCLUDE_DIRS='transcoded-content/|transfer33/|transfre/'
 if [ "x$DEBUG" == "x1" ]; then
 	echo "mkdir -p '$WORKING_DIR'"
 else
@@ -81,9 +81,9 @@ done
 # end of job starter
 
 
-CMD="timeout $TIMEOUT_GET_LS $RSYNC --list-only $REMOTE_SOURCE" 
+CMD="timeout $TIMEOUT_GET_LS $RSYNC -r --list-only $REMOTE_SOURCE" 
 if [ "x$DEBUG" == "x1" ]; then
-	echo $CMD  "| /bin/egrep -i $VIDEO_EXT > $WORKING_DIR/ls.tmp"
+	echo $CMD  "| /bin/egrep -i $VIDEO_EXT | /bin/egrep -v EXCLUDE_DIRS > $WORKING_DIR/ls.tmp"
 else
 	$CMD  | /bin/egrep -i $VIDEO_EXT > $WORKING_DIR/ls.tmp
 fi
@@ -111,22 +111,28 @@ do
 	if [ -d $DATA_DIR/$ID ]; then
 		continue
 	fi
-	FILENAME=`echo $next  | /usr/bin/perl -ne '/^\S+\s+\S+\s+\S+\s+\S+\s+(.+)$/; print unpack( "h*","$1" );'`
+	FILENAME=`echo $next  | /usr/bin/perl -ne '/^\S+\s+\S+\s+\S+\s+\S+\s+(.+)$/; print "$1" ;'`
+	#FILENAME=`echo $next  | /usr/bin/perl -ne '/^\S+\s+\S+\s+\S+\s+\S+\s+(.+)$/; print unpack( "h*","$1" );'`
 	# we use unpacked in hex format filename (for spaces and special chars)
 	# for decode use perl -e 'print pack( "h*", "hex_string" )."\n";'
 	#
 	if [ "x$DEBUG" == "x1" ]; then
-		echo ${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID $FILENAME "
+		echo ${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID"
 		echo "mkdir $DATA_DIR/$ID"
 	else
-		w2log "Put job in queue downloader: ${DIRNAME}/downloader.sh $ID $FILENAME "
-		${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID  $FILENAME " >> ${PROCESS_LOG} 2>&1
+		w2log "Put job in queue downloader: ${DIRNAME}/downloader.sh $ID"
+		${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID" >> ${PROCESS_LOG} 2>&1
 		
 		if [ $? -ne 0 ]; then
 			w2log "Error: Cannot put job in queue. See $PROCESS_LOG"
 			continue
-		fi		
-		mkdir ${DATA_DIR}/${ID}
+		fi
+		[ -d "${DATA_DIR}/${ID}" ] || mkdir -p "${DATA_DIR}/${ID}"
+		JOB_SETTINGS_FILE=${DATA_DIR}/${ID}/job_settings.sh
+		OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+)\.(\w+)$/; my $filename=$1; my $ext=$2; $filename=~s/\W/_/g; print "$filename.$ext";'`
+		echo "export REMOTE_SOURCE_FILE=${REMOTE_SOURCE}/${FILENAME}" > $JOB_SETTINGS_FILE
+		echo "export DOWNLOAD_TO=${DATA_DIR}/${ID}/${OUTPUT_FILENAME} " >> $JOB_SETTINGS_FILE
+		#echo "GET_FILE=${REMOTE_TARGET}/${FILENAME}" > $JOB_SETTINGS_FILE
 	fi			
 done
 
