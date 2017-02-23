@@ -120,26 +120,30 @@ do
 		echo "mkdir $DATA_DIR/$ID"
 	else
 		w2log "Put job in queue downloader: ${DIRNAME}/downloader.sh $ID"
-		${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID" >> ${PROCESS_LOG} 2>&1
-		
-		if [ $? -ne 0 ]; then
-			w2log "Error: Cannot put job in queue. See $PROCESS_LOG"
-			continue
-		fi
-		[ -d "${DATA_DIR}/${ID}" ] || mkdir -p "${DATA_DIR}/${ID}"
+		for i in `seq 4`; do		
+			timeout 60 ${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID" >> ${PROCESS_LOG} 2>&1
+			if [  $? -eq 0  ]; then
+				[ -d "${DATA_DIR}/${ID}" ] || mkdir -p "${DATA_DIR}/${ID}"
 
-		JOB_SETTINGS_FILE=${DATA_DIR}/${ID}/job_settings.sh
-		RELATIVE_DIR=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; print "$1";'`
-		OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+)\.(\w+)$/; my $filename=$2; my $ext=$3; $filename=~s/[\W]+/_/g; print "$filename.$ext";'`
-		echo "export REMOTE_SOURCE_FILE='${REMOTE_SOURCE}/${FILENAME}'" > $JOB_SETTINGS_FILE
-		echo "export DOWNLOAD_TO=${DATA_DIR}/${ID}/${RELATIVE_DIR}/${OUTPUT_FILENAME}" >> $JOB_SETTINGS_FILE
-		echo "export RELATIVE_DOWNLOAD_TO=${RELATIVE_DIR}${OUTPUT_FILENAME}" >> $JOB_SETTINGS_FILE
-		echo "export RELATIVE_DIR=${RELATIVE_DIR}" >> $JOB_SETTINGS_FILE
+				JOB_SETTINGS_FILE=${DATA_DIR}/${ID}/job_settings.sh
+				RELATIVE_DIR=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; my $filename=$1; $filename=~s/[^\w\/]+/_/g; print "$filename\n";'`
+				OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; my $filename=$2; $filename=~s/[^\w\/\.]+/_/g; print "$filename\n";'`
+				#OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+)\.(\w+)$/; my $filename=$2; my $ext=$3; $filename=~s/^[\w\/\.]+/_/g; print "$filename.$ext";'`
+				echo "export REMOTE_SOURCE_FILE='${REMOTE_SOURCE}/${FILENAME}'" > $JOB_SETTINGS_FILE
+				echo "export DOWNLOAD_TO=${DATA_DIR}/${ID}/${RELATIVE_DIR}/${OUTPUT_FILENAME}" >> $JOB_SETTINGS_FILE
+				echo "export RELATIVE_DOWNLOAD_TO=${RELATIVE_DIR}${OUTPUT_FILENAME}" >> $JOB_SETTINGS_FILE
+				echo "export RELATIVE_DIR=${RELATIVE_DIR}" >> $JOB_SETTINGS_FILE	
+				break
+			fi
+			w2log "Error: Cannot put job in queue downloader. See $PROCESS_LOG. Attempt $i"			
+			let SLEEP_TIME=" 60 * $i " 
+			sleep $SLEEP_TIME		
+		done		
 	fi			
 done
 
+rm -rf $MY_PID_FILE
+exit 0
 
 
 #
-rm -rf $MY_PID_FILE
-exit 0

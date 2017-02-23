@@ -4,7 +4,7 @@
 This solution can help you get video file from one resource, transcode to specified format and upload to 
 another resource. Can be run localy or on the remote site. 
 
-* Version 1.2 2017.02.22
+* Version 1.3 2017.02.23
 
 ##  How?
 There are 3 independed queue ( download, transcode, upload ), for every queue we can set max_jobs value.
@@ -27,9 +27,13 @@ This script require:
  + ffmpeg
  + rsync
  
-Extract archive into any folder. Add string 
+Extract archive into any folder. Add strings 
 ```
 *       *       *       *       *       /home/your_dir/job_starter.sh >> /home/your_dir/data/crontab.log 2>&1
+0       0       1       *       *       /bin/mv -f /home/home_dir/data/ffmpeg_convert1.log /home/home_dir/data/ffmpeg_convert1.log.1  >> /home/home_dir/data/crontab.log 2>&1
+0       0       10      *       *       /bin/mv -f /home/home_dir/data/ffmpeg_convert1.log /home/home_dir/data/ffmpeg_convert1.log.10  >> /home/home_dir/data/crontab.log 2>&1
+0       0       20      *       *       /bin/mv -f /home/home_dir/data/ffmpeg_convert1.log /home/home_dir/data/ffmpeg_convert1.log.20  >> /home/home_dir/data/crontab.log 2>&1
+
 ``` 
 into crontab.
 
@@ -41,6 +45,9 @@ Change the value in file `common.sh` :
 export PROJECT_DIR=/home/osboxes/ffmpeg_convert1
 export REMOTE_SOURCE='/tmp/2/'
 export REMOTE_TARGET='/tmp/2/transcoded-content/'
+export JOBS_LIMIT_DOWNLOADER=3
+export JOBS_LIMIT_TRANSCODER=5
+export JOBS_LIMIT_UPLOADER=3
 ```
 
 

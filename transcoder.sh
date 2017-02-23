@@ -76,7 +76,8 @@ if [ "x${TRANSCODE_FORMAT}" == "x320" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b:v 200000 -threads 4  ${OUTPUT_FILENAME}"
+#	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=320:h=180:force_original_aspect_ratio=decrease -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b:v 200000 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=320:h=-2 -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b:v 200000 -threads 4  ${OUTPUT_FILENAME}"
 fi
 
 if [ "x${TRANSCODE_FORMAT}" == "x640" ] ; then
@@ -86,7 +87,8 @@ if [ "x${TRANSCODE_FORMAT}" == "x640" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 640x360 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b:v 520000 -threads  4  ${OUTPUT_FILENAME}"
+#	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=640:h=360:force_original_aspect_ratio=decrease -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b:v 520000 -threads  4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=640:h=-2 -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -level 30 -g 48 -b:v 520000 -threads  4  ${OUTPUT_FILENAME}"
 fi	
 
 if [ "x${TRANSCODE_FORMAT}" == "x400" ] ; then
@@ -96,7 +98,8 @@ if [ "x${TRANSCODE_FORMAT}" == "x400" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 320x180 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 270000 -threads 4  ${OUTPUT_FILENAME}"
+#	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=320:h=180:force_original_aspect_ratio=decrease -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 270000 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=320:h=-2 -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 270000 -threads 4  ${OUTPUT_FILENAME}"
 fi
 
 if [ "x${TRANSCODE_FORMAT}" == "x700" ] ; then
@@ -106,7 +109,8 @@ if [ "x${TRANSCODE_FORMAT}" == "x700" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 420x270 -y -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 570000 -threads 4  ${OUTPUT_FILENAME}"
+#	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=420:h=270:force_original_aspect_ratio=decrease -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 570000 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=420:h=-2 -strict experimental -acodec aac -ab 64k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 570000 -threads 4  ${OUTPUT_FILENAME}"
 fi
 
 if [ "x${TRANSCODE_FORMAT}" == "x1100" ] ; then
@@ -116,7 +120,8 @@ if [ "x${TRANSCODE_FORMAT}" == "x1100" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 720x406 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1000000 -threads 4  ${OUTPUT_FILENAME}"
+#	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=702:h=406:force_original_aspect_ratio=decrease -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1000000 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=702:h=-2 -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1000000 -threads 4  ${OUTPUT_FILENAME}"
 fi
 
 if [ "x${TRANSCODE_FORMAT}" == "x1300" ] ; then
@@ -126,7 +131,8 @@ if [ "x${TRANSCODE_FORMAT}" == "x1300" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 1024x576 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1200000 -threads 4  ${OUTPUT_FILENAME}"
+#	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=1024:h=576:force_original_aspect_ratio=decrease -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1200000 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=1024:h=-2 -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1200000 -threads 4  ${OUTPUT_FILENAME}"
 fi
 
 if [ "x${TRANSCODE_FORMAT}" == "x1500" ] ; then
@@ -136,7 +142,8 @@ if [ "x${TRANSCODE_FORMAT}" == "x1500" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 1080x608 -y -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1400000 -threads 4  ${OUTPUT_FILENAME}"
+#	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=1080:h=608:force_original_aspect_ratio=decrease -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1400000 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=1080:h=-2 -strict experimental -acodec aac -ab 128k -ac 2 -ar 48000 -vcodec libx264 -vprofile main -g 48 -b:v 1400000 -threads 4  ${OUTPUT_FILENAME}"
 fi
 
 if [ "x${TRANSCODE_FORMAT}" == "x175k" ] ; then
@@ -146,7 +153,8 @@ if [ "x${TRANSCODE_FORMAT}" == "x175k" ] ; then
 		rm -rf $MY_PID_FILE
 		exit 1
 	fi	
-	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -s 212x120 -y -strict experimental -acodec aac -ab 96k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -g 48 -b:v 85000 -level 30 -threads 4  ${OUTPUT_FILENAME}"
+#	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=212:h=120:force_original_aspect_ratio=decrease -strict experimental -acodec aac -ab 96k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -g 48 -b:v 85000 -level 30 -threads 4  ${OUTPUT_FILENAME}"
+	CMD="timeout ${TIMEOUT_TRANSCODE} ${FFMPEG_DIR}/ffmpeg  -loglevel warning  -y  -i ${FILENAME} -vf scale=w=212:h=-2 -strict experimental -acodec aac -ab 96k -ac 2 -ar 48000 -vcodec libx264 -vprofile baseline -g 48 -b:v 85000 -level 30 -threads 4  ${OUTPUT_FILENAME}"
 fi
 # End of 'define transcoding command'
 
@@ -185,16 +193,18 @@ if [ "x$DEBUG" == "x1" ]; then
 	echo ${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}"
 else
 	w2log "Put job in queue uploader: ${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}"
-	${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}" >> ${PROCESS_LOG} 2>&1
+	for i in `seq 4`; do
+		timeout 60 ${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}" >> ${PROCESS_LOG} 2>&1 
+		if [  $? -eq 0  ]; then
+			rm -rf $MY_PID_FILE
+			exit 0
+		fi	
+		w2log "Error: Cannot put job in queue uploader. See $PROCESS_LOG. Attempt $i"
+		let SLEEP_TIME=" 180 * $i " 
+		sleep $SLEEP_TIME		
+	done
 fi
 
-if [  $? -ne 0  ]; then
-	w2log "Error: Cannot put job in queue. See $PROCESS_LOG"
-	rm -rf $MY_PID_FILE
-	exit 1
-fi	
-
-
-#w2log "Process $$ finished successfully"
+w2log "Error: Cannot put job in queue uploader. See $PROCESS_LOG"
 rm -rf $MY_PID_FILE
-exit 0
+exit 1

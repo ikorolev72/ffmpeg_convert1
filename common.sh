@@ -15,15 +15,16 @@ if [ -d /home/hd25/stainlast12/ffmpeg_convert1 ]; then
 	export REMOTE_TARGET='transfer33@185.25.48.253:/etc/video/transcoded-content/'
 fi
 export DATA_DIR=$PROJECT_DIR/data
-export TIMEOUT_GET_FILE=3600 # 1hour
-export TIMEOUT_TRANSCODE=7200 # 2hours
-export TIMEOUT_PUT_FILE=3600 # 1hour
-export TIMEOUT_GET_LS=120 # 1min
+export TIMEOUT_GET_FILE=36000 # 10hour
+export TIMEOUT_TRANSCODE=36000 # 10hours
+export TIMEOUT_PUT_FILE=36000 # 10hour
+export TIMEOUT_GET_LS=180 # 3min
 export JOBS_LIMIT_DOWNLOADER=3
 export JOBS_LIMIT_TRANSCODER=5
 export JOBS_LIMIT_UPLOADER=3
 
-export TRANSCODE_FORMATS_LIST='320 640 400 700 1100 1300 1500 175k'
+#export TRANSCODE_FORMATS_LIST='320 640 400 700 1100 1300 1500 175k'
+export TRANSCODE_FORMATS_LIST='640 400 1100'
 
 export RSYNC="/usr/bin/rsync --rsh=ssh "
 export LOG=$DATA_DIR/ffmpeg_convert1.log

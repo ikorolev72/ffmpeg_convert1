@@ -93,13 +93,16 @@ for i in $TRANSCODE_FORMATS_LIST; do
 		echo ${DIRNAME}/send2queue.pl transcoder "${DIRNAME}/transcoder.sh $ID $i"
 	else
 		w2log "Put job in queue transcoder: ${DIRNAME}/transcoder.sh $ID $i"
-		${DIRNAME}/send2queue.pl transcoder "${DIRNAME}/transcoder.sh $ID $i" >> ${PROCESS_LOG} 2>&1
+		for attempt in `seq 4`; do		
+			timeout 360 ${DIRNAME}/send2queue.pl transcoder "${DIRNAME}/transcoder.sh $ID $i" >> ${PROCESS_LOG} 2>&1
+			if [  $? -eq 0  ]; then
+				break
+			fi	
+			w2log "Error: Cannot put job in queue transcoder. See $PROCESS_LOG. Attempt $attempt"						
+			let SLEEP_TIME=" 360 * $attempt " 
+			sleep $SLEEP_TIME		
+		done				
 	fi
-	if [  $? -ne 0  ]; then
-		w2log "Error: Cannot put job in queue. See $PROCESS_LOG"
-		rm -rf "${DOWNLOAD_TO}.${i}"
-		continue
-	fi	
 done
 
 #w2log "Process $$ finished successfully"
