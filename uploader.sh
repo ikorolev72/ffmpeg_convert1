@@ -1,14 +1,14 @@
-#/bin/bash
+#!/bin/bash
 # korolev-ia [] yandex.ru
 # This script
 # upload  video file  to external site
 # 
 # Arguments: id /path/filename.mp4 
-# eg decoder.sh 123456789 /get_path/filename.mp4 
+# eg decoder.sh 123456789 relative_path/filename.mp4 
 BASENAME=`basename $0`
 cd `dirname $0`
 DIRNAME=`pwd`
-source "$DIRNAME/common.sh"
+. "$DIRNAME/common.sh"
 
 #DEBUG=1
 
@@ -39,7 +39,7 @@ MY_PID_FILE="${WORKING_DIR}/$$.uploader.pid"
 echo  "$$"  > $MY_PID_FILE
 
 
-
+cd $WORKING_DIR
 if [ "x$DEBUG" != "x1" ]; then
 	if [ ! -f $OUTPUT_FILENAME  ]; then
 		w2log "File $OUTPUT_FILENAME do not exist"
@@ -53,11 +53,11 @@ if [ ! -f $JOB_SETTINGS_FILE ]; then
 	w2log "File $JOB_SETTINGS_FILE do not exist. Cannot set parameters"
 	exit 1
 fi
-source $JOB_SETTINGS_FILE
+.  $JOB_SETTINGS_FILE
 
 
 ###################### put file to remote server
-cd $WORKING_DIR
+
 
 for i in `seq 4`; do
 	CMD="timeout ${TIMEOUT_PUT_FILE} $RSYNC -aR ${OUTPUT_FILENAME} ${REMOTE_TARGET}"

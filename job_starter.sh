@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 # korolev-ia [] yandex.ru
 # This job_starter
 # check the new files, check the queue and run tasks
@@ -7,15 +7,16 @@
 BASENAME=`basename $0`
 cd `dirname $0`
 DIRNAME=`pwd`
-source "$DIRNAME/common.sh"
+. "$DIRNAME/common.sh"
 
 #DEBUG=1
 
 
 WORKING_DIR=$DATA_DIR/job_starter
 PROCESS_LOG=$WORKING_DIR/job_starter.log
-VIDEO_EXT='\.mp4$|\.avi$|\.mkv$'
+VIDEO_EXT='\.mp4$|\.avi$|\.mkv$|\.flv$|\.mov$'
 EXCLUDE_DIRS='transcoded-content/|transfer33/|transfre/'
+
 if [ "x$DEBUG" == "x1" ]; then
 	echo "mkdir -p '$WORKING_DIR'"
 else
@@ -80,7 +81,7 @@ for i in `seq $RUNNING_JOBS $JOBS_LIMIT_UPLOADER` ; do
 done
 # end of job starter
 
-
+# check the new files on remote host
 CMD="timeout $TIMEOUT_GET_LS $RSYNC -r --list-only $REMOTE_SOURCE" 
 if [ "x$DEBUG" == "x1" ]; then
 	echo $CMD  "| /bin/egrep -i $VIDEO_EXT | /bin/egrep -v $EXCLUDE_DIRS > $WORKING_DIR/ls.tmp"
@@ -103,19 +104,17 @@ else
 fi
 
 
-
+# put new job in the queue for every new file on remote source
 IFS=$'\n'
 for next in `$DIRNAME/same_strings.pl --f1=$WORKING_DIR/ls.tmp --f2=$WORKING_DIR/ls.tmp.old`
 do
+	# unique id - it is md5sum for string
 	ID=`echo $next | /usr/bin/md5sum | awk '{ print $1 }'`
 	if [ -d $DATA_DIR/$ID ]; then
 		continue
 	fi
 	FILENAME=`echo $next  | /usr/bin/perl -ne '/^\S+\s+\S+\s+\S+\s+\S+\s+(.+)$/; print "$1" ;'`
-	#FILENAME=`echo $next  | /usr/bin/perl -ne '/^\S+\s+\S+\s+\S+\s+\S+\s+(.+)$/; print unpack( "h*","$1" );'`
-	# we use unpacked in hex format filename (for spaces and special chars)
-	# for decode use perl -e 'print pack( "h*", "hex_string" )."\n";'
-	#
+
 	if [ "x$DEBUG" == "x1" ]; then
 		echo ${DIRNAME}/send2queue.pl downloader "${DIRNAME}/downloader.sh $ID"
 		echo "mkdir $DATA_DIR/$ID"
@@ -128,14 +127,13 @@ do
 			continue
 		fi
 		[ -d "${DATA_DIR}/${ID}" ] || mkdir -p "${DATA_DIR}/${ID}"
-		#OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+)\.(\w+)$/; my $filename=$1; my $ext=$2; $filename=~s/[^\w\/]/_/g; print "$filename.$ext";'`
-		#OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; print "$2";'`
+
 		JOB_SETTINGS_FILE=${DATA_DIR}/${ID}/job_settings.sh
 		RELATIVE_DIR=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; print "$1";'`
-		OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+\.\w+)$/; print "$2";'`
+		OUTPUT_FILENAME=`echo $FILENAME | /usr/bin/perl -ne '/^(.+\/)*(.+)\.(\w+)$/; my $filename=$2; my $ext=$3; $filename=~s/[\W]+/_/g; print "$filename.$ext";'`
 		echo "export REMOTE_SOURCE_FILE='${REMOTE_SOURCE}/${FILENAME}'" > $JOB_SETTINGS_FILE
-		echo "export DOWNLOAD_TO=${DATA_DIR}/${ID}/${OUTPUT_FILENAME} " >> $JOB_SETTINGS_FILE
-		echo "export RELATIVE_DOWNLOAD_TO=${OUTPUT_FILENAME} " >> $JOB_SETTINGS_FILE
+		echo "export DOWNLOAD_TO=${DATA_DIR}/${ID}/${RELATIVE_DIR}/${OUTPUT_FILENAME}" >> $JOB_SETTINGS_FILE
+		echo "export RELATIVE_DOWNLOAD_TO=${RELATIVE_DIR}${OUTPUT_FILENAME}" >> $JOB_SETTINGS_FILE
 		echo "export RELATIVE_DIR=${RELATIVE_DIR}" >> $JOB_SETTINGS_FILE
 	fi			
 done
