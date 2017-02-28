@@ -1,11 +1,6 @@
 #!/bin/bash
 # korolev-ia [] yandex.ru
 # This downloader download the file with rsync
-# transcode into another format
-# upload to new resource
-# 
-# Arguments:  id
-# or
 # Arguments:  id
 # eg downloader.sh  123
 
@@ -90,18 +85,14 @@ for i in $TRANSCODE_FORMATS_LIST; do
 		fi			
 	fi
 	if [ "x$DEBUG" == "x1" ]; then
-		echo ${DIRNAME}/send2queue.pl transcoder "${DIRNAME}/transcoder.sh $ID $i"
+		echo ${DIRNAME}/send2queue.sh transcoder "${DIRNAME}/transcoder.sh $ID $i"
 	else
 		w2log "Put job in queue transcoder: ${DIRNAME}/transcoder.sh $ID $i"
-		for attempt in `seq 4`; do		
-			timeout 360 ${DIRNAME}/send2queue.pl transcoder "${DIRNAME}/transcoder.sh $ID $i" >> ${PROCESS_LOG} 2>&1
+			timeout 60 ${DIRNAME}/send2queue.sh transcoder "${DIRNAME}/transcoder.sh $ID $i" >> ${PROCESS_LOG} 2>&1
 			if [  $? -eq 0  ]; then
-				break
+				continue
 			fi	
-			w2log "Error: Cannot put job in queue transcoder. See $PROCESS_LOG. Attempt $attempt"						
-			let SLEEP_TIME=" 360 * $attempt " 
-			sleep $SLEEP_TIME		
-		done				
+			w2log "Error: Cannot put job in queue transcoder. See $PROCESS_LOG ."						
 	fi
 done
 

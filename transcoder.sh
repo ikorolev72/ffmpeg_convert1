@@ -190,19 +190,15 @@ fi
 ###################### put job in the queue for upload to remote server
 
 if [ "x$DEBUG" == "x1" ]; then
-	echo ${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}"
+	echo ${DIRNAME}/send2queue.sh uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}"
 else
 	w2log "Put job in queue uploader: ${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}"
-	for i in `seq 4`; do
-		timeout 60 ${DIRNAME}/send2queue.pl uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}" >> ${PROCESS_LOG} 2>&1 
+	timeout 60 ${DIRNAME}/send2queue.sh uploader "${DIRNAME}/uploader.sh $ID ${OUTPUT_FILENAME}" >> ${PROCESS_LOG} 2>&1 
 		if [  $? -eq 0  ]; then
 			rm -rf $MY_PID_FILE
 			exit 0
 		fi	
-		w2log "Error: Cannot put job in queue uploader. See $PROCESS_LOG. Attempt $i"
-		let SLEEP_TIME=" 180 * $i " 
-		sleep $SLEEP_TIME		
-	done
+	w2log "Error: Cannot put job in queue uploader. See $PROCESS_LOG. Attempt $i"
 fi
 
 w2log "Error: Cannot put job in queue uploader. See $PROCESS_LOG"
